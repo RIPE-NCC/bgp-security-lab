@@ -1,0 +1,14 @@
+[Unit]
+Description=ttyd-vtysh instance %I
+
+[Service]
+User=vagrant
+Group=www-data
+RuntimeDirectory=ttyd-container
+UMask=0002
+ExecStart=/opt/ttyd -i /run/ttyd-container/%i-vtysh.sock -t fontSize=14 -t disableLeaveAlert=true tmux -2 -L %i-vtysh set -g default-command "lxc exec %i -t -- vtysh" \; new -A -D -s %i-vtysh
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -4,84 +4,44 @@
   hosts: default
   become: false
   tags: container
-  handlers:
-    - name: reboot hostA
-      delegate_to: hostA
-      reboot:
-
-    - name: reload udev rules
-      command: udevadm control --reload-rules
-      become: true
-
   tasks:
-    - name: Disable lxdbr0 multicast snooping
-      become: true
-      copy:
-        dest: /etc/udev/rules.d/99-disable-lxdbr0-mcast-snooping.rules
-        content: SUBSYSTEM=="net", ACTION=="add", KERNEL=="lxdbr0", RUN+="/bin/sh -c 'echo 0 > /sys/class/net/lxdbr0/bridge/multicast_snooping'"
-      notify: reload udev rules
-
-    - meta: flush_handlers
-
     - name: Initialize LXD
       command:
         cmd: lxd init --preseed
         stdin: "{{ lookup('file', 'lxd_preseed.yaml') }}"
         creates: /var/snap/lxd/common/state
 
-    - name: Create first container
+    - name: Create Ubuntu container for validator
       lxd_container:
-        name: hostA
+        name: validator
         state: started
-        config:
-          volatile.eth0.hwaddr: "00:16:3e:ee:00:0a"
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: 192.0.2.5
+            hwaddr: "00:16:3e:ee:00:05"
+        ignore_volatile_options: false
         source:
           type: image
           mode: pull
-          server: https://images.linuxcontainers.org
           protocol: simplestreams
+          server: https://images.linuxcontainers.org
           alias: ubuntu/focal
         profiles: ["default"]
         wait_for_ipv4_addresses: true
 
-    - name: Disable systemd-networkd IPv6 handling (workaround broken redirects)
-      delegate_to: hostA
-      lineinfile:
-        path: /etc/netplan/10-lxc.yaml
-        insertafter: "^ *dhcp-identifier: mac"
-        line: "      accept-ra: false"
-      notify: reboot hostA
-
-    - name: Enable kernel-level IPv6 autoconf (workaround broken redirects)
-      delegate_to: hostA
-      copy:
-        dest: /etc/sysctl.d/99-accept_ra.conf
-        content: "net.ipv6.conf.eth0.accept_ra = 1"
-      notify: reboot hostA
-
-    - name: Hack enable kernel-level IPv6 autoconf (workaround broken redirects)
-      delegate_to: hostA
-      copy:
-        dest: /etc/rc.local
-        mode: u=rwx,g=rx,o=rx
-        content: '#!/bin/sh
-
-          sysctl -w net.ipv6.conf.eth0.accept_ra=1
-
-          '
-      notify: reboot hostA
-
-    - meta: flush_handlers
-
     - name: Install python3-apt
-      delegate_to: hostA
+      delegate_to: validator
       command:
         cmd: apt-get -y install python3-apt
         warn: false
         creates: /usr/lib/python3/dist-packages/apt/package.py
 
     - name: Install necessary packages
-      delegate_to: hostA
+      delegate_to: validator
       package:
         update_cache: true
         name:
@@ -105,92 +65,165 @@
           - vim
 
     - name: Upgrade pip3
-      delegate_to: hostA
+      delegate_to: validator
       pip:
         executable: pip3
         state: latest
         name: pip
 
-    - name: Install python packages
-      delegate_to: hostA
-      pip:
-        executable: pip3
-        state: latest
+    - name: Create Alpine container
+      lxd_container:
+        name: transit66
+        state: started
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: 192.0.2.66
+            hwaddr: "00:16:3e:ee:01:66"
+        ignore_volatile_options: false
+        source:
+          type: image
+          mode: pull
+          server: https://images.linuxcontainers.org
+          protocol: simplestreams
+          alias: alpine/3.15/amd64
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+
+    - name: Check Python3 in the container
+      delegate_to: transit66
+      raw: python3 /dev/null
+      register: python3_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Python 3 into Alpine container
+      delegate_to: transit66
+      raw: apk add python3
+      when: python3_check.rc != 0
+
+    - name: Upgrade everything in the container
+      delegate_to: transit66
+      apk:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install FRR into container
+      delegate_to: transit66
+      apk:
         name:
-          - scapy[basic]
-          - cryptography
-          - netaddr
+          - frr
+          - frr-rpki
 
-    - name: Clone IPv6 toolkit repository
-      delegate_to: hostA
-      git:
-        repo: https://github.com/fgont/ipv6toolkit
-        dest: /usr/src/ipv6toolkit
-      register: clone_toolkit
+    - name: Ensure IP forwarding is enabled
+      delegate_to: transit66
+      sysctl:
+        sysctl_file: /etc/sysctl.d/forwarding.conf
+        name: "{{ item }}"
+        value: "1"
+        sysctl_set: yes
+      with_items:
+          - net.ipv4.conf.all.forwarding
+          - net.ipv6.conf.all.forwarding
+          - net.ipv6.conf.default.forwarding
 
-    - name: Compile the IPv6 toolkit
-      delegate_to: hostA
-      command:
-        cmd: make all
-        chdir: /usr/src/ipv6toolkit
-      when: clone_toolkit.changed
-      register: compile_toolkit
+    - name: Enable and start sysctl in the container
+      delegate_to: transit66
+      service:
+        name: sysctl
+        state: started
+        enabled: yes
 
-    - name: Install the IPv6 toolkit
-      delegate_to: hostA
-      command:
-        cmd: make install
-        chdir: /usr/src/ipv6toolkit
-      when: compile_toolkit.changed
-
-    - name: Clone the THC-IPv6 repository
-      delegate_to: hostA
-      git:
-        repo: https://github.com/vanhauser-thc/thc-ipv6
-        dest: /usr/src/thc-ipv6
-      register: clone_thc
-
-    - name: Compile the THC-IPv6 toolkit
-      delegate_to: hostA
-      command:
-        cmd: make
-        chdir: /usr/src/thc-ipv6
-      when: clone_thc.changed
-      register: compile_thc
-
-    - name: Install the THC-IPv6 toolkit
-      delegate_to: hostA
-      command:
-        cmd: make install
-        chdir: /usr/src/thc-ipv6
-      when: compile_thc.changed
-
-    - name: Download Termshark
-      delegate_to: hostA
-      unarchive:
-        src: https://github.com/gcla/termshark/releases/download/v2.3.0/termshark_2.3.0_linux_x64.tar.gz
-        remote_src: yes
-        dest: /usr/local/bin/
-        extra_opts:
-          - --transform
-          - "s_^.*/__"
-
-    - name: Clone container
+    - name: Clone Alpine containers
       lxd_container:
         name: "{{ item.name }}"
-        config:
-          volatile.eth0.hwaddr: "{{ item.mac }}"
+        ignore_volatile_options: false
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: "{{ item.ip }}"
+            hwaddr: "{{ item.mac }}"
         state: started
         source:
           type: copy
-          source: hostA
+          source: transit66
         profiles: ["default"]
         wait_for_ipv4_addresses: true
       with_items:
-        - name: hostB
-          mac: 00:16:3e:ee:00:0b
-        - name: hostC
-          mac: 00:16:3e:ee:00:0c
+        - name: transit99
+          mac: 00:16:3e:ee:01:99
+          ip: 192.0.2.99
+        - name: edge1
+          mac: 00:16:3e:ee:0e:01
+          ip: 192.0.2.101
+        - name: edge2
+          mac: 00:16:3e:ee:0e:02
+          ip: 192.0.2.102
+
+- name: FRR configuration
+  hosts: frr
+  tags: frr
+  tasks:
+    - name: Template common configs
+      template:
+        src: "frr/{{ item }}.j2"
+        dest: "/etc/frr/{{ item }}"
+        owner: frr
+        group: frr
+        mode: 0644
+      notify: restart frr
+      with_items:
+        - vtysh.conf
+
+    - name: Deploy configs
+      copy:
+        src: "frr/{{ inventory_hostname }}/{{ item }}"
+        dest: "/etc/frr/{{ item }}"
+        owner: frr
+        group: frr
+        mode: 0644
+      notify: restart frr
+      when: "[ playbook_dir, \"files/frr\", inventory_hostname, item]|join('/') is file"
+      with_items:
+        - zebra.conf
+        - bgpd.conf
+
+    - name: Enable FRR daemons
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "{{ item }}=yes"
+        regexp: "^{{ item }}="
+      notify: restart frr
+      with_items:
+        - bgpd
+        #- ospfd
+        #- ospf6d
+        #- isisd
+
+    - name: Enable RPKI support
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "bgpd_options=\"   -A 127.0.0.1 -M rpki\""
+        regexp: "^bgpd_options="
+      notify: restart frr
+
+    - name: Enable and start frr
+      service:
+        name: frr
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart frr
+      service:
+        name: frr
+        state: restarted
 
 - name: Host provision
   hosts: default
@@ -317,16 +350,20 @@
         mode: 0644
       notify: systemctl daemon-reload
       with_items:
+        - ttyd-vtysh@.service
         - ttyd-container@.service
         - ttyd-admin.service
         - ttyd-container.target
 
-    - name: Deploy ttyd-container generator
+    - name: Deploy ttyd-container generators
       template:
-        src: systemd/ttyd-container.generator
+        src: "{{ item }}"
         dest: "/etc/systemd/system-generators/"
         mode: 0755
       notify: systemctl daemon-reload
+      with_items:
+        - systemd/ttyd-container.generator
+        - systemd/ttyd-vtysh.generator
 
     - name: Enable and start ttyd-container target
       service:
