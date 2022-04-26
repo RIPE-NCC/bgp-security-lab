@@ -130,6 +130,19 @@
           - net.ipv6.conf.all.forwarding
           - net.ipv6.conf.default.forwarding
 
+    - name: Ensure SLAAC is enabled
+      delegate_to: transit66
+      sysctl:
+        sysctl_file: /etc/sysctl.d/slaac.conf
+        name: "{{ item }}"
+        value: "2"
+        sysctl_set: yes
+      with_items:
+          - net.ipv6.conf.default.accept_ra
+          - net.ipv6.conf.all.accept_ra
+          - net.ipv6.conf.eth0.accept_ra
+
+
     - name: Enable and start sysctl in the container
       delegate_to: transit66
       service:
