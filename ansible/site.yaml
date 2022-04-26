@@ -206,6 +206,7 @@
       with_items:
         - zebra.conf
         - bgpd.conf
+        - staticd.conf
 
     - name: Enable FRR daemons
       lineinfile:
