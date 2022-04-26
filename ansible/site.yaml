@@ -250,6 +250,13 @@
         warn: false
         creates: /usr/lib/python3/dist-packages/apt/package.py
 
+    - name: Disable unattended upgrades
+      apt:
+        package: unattended-upgrades
+        state: absent
+        autoremove: yes
+        purge: yes
+
     - name: Import Debian Stretch repo key (for tmux 2.3)
       apt_key:
         url: "https://ftp-master.debian.org/keys/archive-key-9.asc"
@@ -280,6 +287,11 @@
       apt:
         package: tmux
         default_release: stretch
+
+    - name: Prevent tmux upgrades
+      dpkg_selections:
+        name: tmux
+        selection: hold
 
     - name: Install necessary packages
       apt:
