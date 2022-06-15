@@ -10,6 +10,38 @@ networks:
     bridge.hwaddr: "00:16:3e:ee:00:01"
   description: "Default network"
   name: lxdbr0
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r2customerA
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r3customerB
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r2r3
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r2r1
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r3r1
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r1peer200
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: r1transit
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: ixp
 storage_pools:
 - config:
     size: 15GB
