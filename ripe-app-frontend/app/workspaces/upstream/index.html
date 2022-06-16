@@ -1,0 +1,37 @@
+    <style>
+        div.flex {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        div.flex div {
+          float: left;
+          margin: 12px;
+        }
+        textarea {
+          min-width: 320px;
+          min-height: 100px;
+          width: 640px;
+          height: 30%;
+          background-color: black;
+          color: white;
+          resize: both;
+        }
+    </style>
+    <section>
+       <h2>Upstream routers</h2>
+         <div class="flex">
+           <vm-console src="/vtysh/upstream65/"><h3>Upstream 65</h3></vm-console>
+           <vm-console src="/vtysh/upstream66/"><h3>Upstream 66</h3></vm-console>
+           <div>
+             <h3>Hints</h3>
+             <ul>
+               <li>Feel free to <strong>resize terminal windows</strong> by dragging (does not work in Safari)</li>
+               <li>To scroll inside the tmux, use <code>Ctrl-B</code> and <code>PageUp</code>/<code>PageDown</code> (<code>Fn</code> + <code>Up</code>/<code>Down</code> on Mac)</li>
+               <li>To open new tmux window, use <code>Ctrl-B c</code></li>
+               <li>See <a href="https://tmuxcheatsheet.com/">tmux cheatsheet</a></li>
+             </ul>
+             <h3>Scratchpad</h3>
+             <textarea>Here you can put some text you need to copy and paste.</textarea>
+           </div>
+         </div>
+    </section>

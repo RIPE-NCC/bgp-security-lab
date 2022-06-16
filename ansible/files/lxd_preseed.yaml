@@ -42,6 +42,14 @@ networks:
     ipv4.address: none
     ipv6.address: none
   name: ixp
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: transitup65
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: transitup66
 storage_pools:
 - config:
     size: 15GB

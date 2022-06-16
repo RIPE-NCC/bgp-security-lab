@@ -191,6 +191,12 @@
         - name: routeserver
           mac: 00:16:3e:ee:00:30
           ip: 192.0.2.30
+        - name: upstream65
+          mac: 00:16:3e:ee:00:65
+          ip: 192.0.2.65
+        - name: upstream66
+          mac: 00:16:3e:ee:00:66
+          ip: 192.0.2.66
 
     - name: Attach networks to the containers
       command:
@@ -253,6 +259,24 @@
          - network: ixp
            container: routeserver
            ifname: ixp
+         - network: ixp
+           container: upstream65
+           ifname: ixp
+         - network: ixp
+           container: upstream66
+           ifname: ixp
+         - network: transitup65
+           container: transit
+           ifname: to_upstream65
+         - network: transitup65
+           container: upstream65
+           ifname: to_transit
+         - network: transitup66
+           container: transit
+           ifname: to_upstream66
+         - network: transitup66
+           container: upstream66
+           ifname: to_transit
 
 - name: FRR configuration
   hosts: frr
