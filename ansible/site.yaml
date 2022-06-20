@@ -68,7 +68,7 @@
 
     - name: Create Alpine container
       lxd_container:
-        name: r1
+        name: R1
         state: started
         devices:
           eth0:
@@ -89,32 +89,32 @@
         wait_for_ipv4_addresses: true
 
     - name: Check Python3 in the container
-      delegate_to: r1
+      delegate_to: R1
       raw: python3 /dev/null
       register: python3_check
       failed_when: false
       changed_when: false
 
     - name: Install Python 3 into Alpine container
-      delegate_to: r1
+      delegate_to: R1
       raw: apk add python3
       when: python3_check.rc != 0
 
     - name: Upgrade everything in the container
-      delegate_to: r1
+      delegate_to: R1
       apk:
         update_cache: yes
         upgrade: yes
 
     - name: Install FRR into container
-      delegate_to: r1
+      delegate_to: R1
       apk:
         name:
           - frr
           - frr-rpki
 
     - name: Ensure IP forwarding is enabled
-      delegate_to: r1
+      delegate_to: R1
       sysctl:
         sysctl_file: /etc/sysctl.d/forwarding.conf
         name: "{{ item }}"
@@ -126,7 +126,7 @@
           - net.ipv6.conf.default.forwarding
 
     - name: Ensure SLAAC is enabled
-      delegate_to: r1
+      delegate_to: R1
       sysctl:
         sysctl_file: /etc/sysctl.d/slaac.conf
         name: "{{ item }}"
@@ -139,7 +139,7 @@
 
 
     - name: Enable and start sysctl in the container
-      delegate_to: r1
+      delegate_to: R1
       service:
         name: sysctl
         state: started
@@ -160,41 +160,41 @@
         state: started
         source:
           type: copy
-          source: r1
+          source: R1
         profiles: ["default"]
         wait_for_ipv4_addresses: true
       with_items:
-        - name: r2
+        - name: R2
           mac: 00:16:3e:ee:01:02
           ip: 192.0.2.102
-        - name: r3
+        - name: R3
           mac: 00:16:3e:ee:01:03
           ip: 192.0.2.103
-        - name: customerA
+        - name: R4
           mac: 00:16:3e:ee:0c:0a
           ip: 192.0.2.151
-        - name: customerB
+        - name: R5
           mac: 00:16:3e:ee:0c:0b
           ip: 192.0.2.152
-        - name: transit
+        - name: R6
           mac: 00:16:3e:ee:00:20
           ip: 192.0.2.20
-        - name: peer200
+        - name: R8
           mac: 00:16:3e:ee:02:00
           ip: 192.0.2.200
-        - name: peer300
+        - name: R9
           mac: 00:16:3e:ee:03:00
           ip: 192.0.2.230
-        - name: peer400
+        - name: R10
           mac: 00:16:3e:ee:04:00
           ip: 192.0.2.240
-        - name: routeserver
+        - name: R7
           mac: 00:16:3e:ee:00:30
           ip: 192.0.2.30
-        - name: upstream65
+        - name: R11
           mac: 00:16:3e:ee:00:65
           ip: 192.0.2.65
-        - name: upstream66
+        - name: R12
           mac: 00:16:3e:ee:00:66
           ip: 192.0.2.66
 
@@ -205,78 +205,78 @@
       failed_when: net_attach.rc not in [0, 1]
       changed_when: net_attach.rc == 0
       with_items:
-         - network: r2customerA
-           container: customerA
-           ifname: to_r2
-         - network: r2customerA
-           container: r2
-           ifname: to_customerA
-         - network: r3customerB
-           container: r3
-           ifname: to_customerB
-         - network: r3customerB
-           container: customerB
-           ifname: to_r3
-         - network: r2r3
-           container: r2
-           ifname: to_r3
-         - network: r2r3
-           container: r3
-           ifname: to_r2
-         - network: r2r1
-           container: r2
-           ifname: to_r1
-         - network: r2r1
-           container: r1
-           ifname: to_r2
-         - network: r3r1
-           container: r3
-           ifname: to_r1
-         - network: r3r1
-           container: r1
-           ifname: to_r3
-         - network: r1peer200
-           container: r1
-           ifname: to_peer200
-         - network: r1peer200
-           container: peer200
-           ifname: to_r1
-         - network: r1transit
-           container: r1
-           ifname: to_transit
-         - network: r1transit
-           container: transit
-           ifname: to_r1
+         - network: R2R4
+           container: R4
+           ifname: to_R2
+         - network: R2R4
+           container: R2
+           ifname: to_R4
+         - network: R3R5
+           container: R3
+           ifname: to_R5
+         - network: R3R5
+           container: R5
+           ifname: to_R3
+         - network: R2R3
+           container: R2
+           ifname: to_R3
+         - network: R2R3
+           container: R3
+           ifname: to_R2
+         - network: R1R2
+           container: R2
+           ifname: to_R1
+         - network: R1R2
+           container: R1
+           ifname: to_R2
+         - network: R1R3
+           container: R3
+           ifname: to_R1
+         - network: R1R3
+           container: R1
+           ifname: to_R3
+         - network: R1R8
+           container: R1
+           ifname: to_R8
+         - network: R1R8
+           container: R8
+           ifname: to_R1
+         - network: R1R6
+           container: R1
+           ifname: to_R6
+         - network: R1R6
+           container: R6
+           ifname: to_R1
          - network: ixp
-           container: r1
+           container: R1
            ifname: ixp
          - network: ixp
-           container: peer300
+           container: R9
            ifname: ixp
          - network: ixp
-           container: peer400
+           container: R9
            ifname: ixp
          - network: ixp
-           container: routeserver
+           container: R7
            ifname: ixp
          - network: ixp
-           container: upstream65
+           container: R11
            ifname: ixp
          - network: ixp
-           container: upstream66
+           container: R12
            ifname: ixp
-         - network: transitup65
-           container: transit
-           ifname: to_upstream65
-         - network: transitup65
-           container: upstream65
-           ifname: to_transit
-         - network: transitup66
-           container: transit
-           ifname: to_upstream66
-         - network: transitup66
-           container: upstream66
-           ifname: to_transit
+         - network: R11R6
+           container: R6
+           ifname: to_R11
+         - network: R11R6
+           container: R11
+           ifname: to_R6
+         - network: R12R6
+           container: R6
+           ifname: to_R12
+         - network: R12R6
+           container: R12
+           ifname: to_R6
 
 - name: FRR configuration
   hosts: frr

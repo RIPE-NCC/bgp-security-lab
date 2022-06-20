@@ -13,31 +13,31 @@ networks:
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r2customerA
+  name: R1R2
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r3customerB
+  name: R1R3
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r2r3
+  name: R2R3
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r2r1
+  name: R2R4
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r3r1
+  name: R3R5
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r1peer200
+  name: R1R8
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: r1transit
+  name: R1R6
 - config:
     ipv4.address: none
     ipv6.address: none
@@ -45,11 +45,11 @@ networks:
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: transitup65
+  name: R11R6
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: transitup66
+  name: R12R6
 storage_pools:
 - config:
     size: 15GB
