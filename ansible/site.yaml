@@ -254,7 +254,7 @@
            container: R9
            ifname: ixp
          - network: ixp
-           container: R9
+           container: R10
            ifname: ixp
          - network: ixp
            container: R7
