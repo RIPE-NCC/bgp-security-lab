@@ -304,9 +304,9 @@
       notify: restart frr
       with_items:
         - bgpd
-        #- ospfd
-        #- ospf6d
-        #- isisd
+        - ospfd
+        - ospf6d
+        - isisd
 
     - name: Enable RPKI support
       lineinfile:
