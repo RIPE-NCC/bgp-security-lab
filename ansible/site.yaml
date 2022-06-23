@@ -249,22 +249,22 @@
            ifname: to_R1
          - network: ixp
            container: R1
-           ifname: ixp
+           ifname: to_IXP
          - network: ixp
            container: R9
-           ifname: ixp
+           ifname: to_IXP
          - network: ixp
            container: R10
-           ifname: ixp
+           ifname: to_IXP
          - network: ixp
            container: R7
-           ifname: ixp
+           ifname: to_IXP
          - network: ixp
            container: R11
-           ifname: ixp
+           ifname: to_IXP
          - network: ixp
            container: R12
-           ifname: ixp
+           ifname: to_IXP
          - network: R11R6
            container: R6
            ifname: to_R11
@@ -282,17 +282,6 @@
   hosts: frr
   tags: frr
   tasks:
-    - name: Template common configs
-      template:
-        src: "frr/{{ item }}.j2"
-        dest: "/etc/frr/{{ item }}"
-        owner: frr
-        group: frr
-        mode: 0644
-      notify: restart frr
-      with_items:
-        - vtysh.conf
-
     - name: Deploy configs
       copy:
         src: "frr/{{ inventory_hostname }}/{{ item }}"
@@ -303,9 +292,9 @@
       notify: restart frr
       when: "[ playbook_dir, \"files/frr\", inventory_hostname, item]|join('/') is file"
       with_items:
-        - zebra.conf
-        - bgpd.conf
-        - staticd.conf
+        - vtysh.conf
+        - banner.txt
+        - frr.conf
 
     - name: Enable FRR daemons
       lineinfile:
