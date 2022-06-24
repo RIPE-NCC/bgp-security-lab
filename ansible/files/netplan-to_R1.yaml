@@ -1,0 +1,6 @@
+network:
+  version: 2
+  ethernets:
+    to_R1:
+      dhcp4: false
+      addresses: [2001:db8:100:99::2/64]

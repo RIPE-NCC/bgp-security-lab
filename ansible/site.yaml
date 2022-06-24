@@ -4,6 +4,11 @@
   hosts: default
   become: false
   tags: container
+  handlers:
+    - name: netplan apply
+      command: netplan apply
+      delegate_to: validator
+
   tasks:
     - name: Initialize LXD
       command:
@@ -65,6 +70,13 @@
         executable: pip3
         state: latest
         name: pip
+
+    - name: Setup to_R1 interface
+      delegate_to: validator
+      copy:
+        src: netplan-to_R1.yaml
+        dest: /etc/netplan/20-to_R1.yaml
+      notify: netplan apply
 
     - name: Create Alpine container
       lxd_container:
@@ -277,6 +289,12 @@
          - network: R12R6
            container: R12
            ifname: to_R6
+         - network: R1validator
+           container: R1
+           ifname: to_validator
+         - network: R1validator
+           container: validator
+           ifname: to_R1
 
 - name: FRR configuration
   hosts: frr

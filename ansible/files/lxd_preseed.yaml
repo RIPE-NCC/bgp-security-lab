@@ -50,6 +50,10 @@ networks:
     ipv4.address: none
     ipv6.address: none
   name: R12R6
+- config:
+    ipv4.address: none
+    ipv6.address: none
+  name: R1validator
 storage_pools:
 - config:
     size: 15GB
