@@ -8,6 +8,11 @@
     - name: netplan apply
       command: netplan apply
       delegate_to: validator
+    - name: restart frr
+      delegate_to: R1
+      service:
+        name: frr
+        state: restarted
 
   tasks:
     - name: Initialize LXD
@@ -157,6 +162,29 @@
         name: sysctl
         state: started
         enabled: yes
+
+    - name: Enable FRR daemons
+      delegate_to: R1
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "{{ item }}=yes"
+        regexp: "^{{ item }}="
+      notify: restart frr
+      with_items:
+        - bgpd
+        - ospfd
+        - ospf6d
+        - isisd
+
+    - name: Enable RPKI support
+      delegate_to: R1
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "bgpd_options=\"   -A 127.0.0.1 -M rpki\""
+        regexp: "^bgpd_options="
+      notify: restart frr
+
+    - meta: flush_handlers
 
     - name: Clone Alpine containers
       lxd_container:
@@ -315,24 +343,6 @@
         - banner.txt
         - frr.conf
 
-    - name: Enable FRR daemons
-      lineinfile:
-        path: "/etc/frr/daemons"
-        line: "{{ item }}=yes"
-        regexp: "^{{ item }}="
-      notify: restart frr
-      with_items:
-        - bgpd
-        - ospfd
-        - ospf6d
-        - isisd
-
-    - name: Enable RPKI support
-      lineinfile:
-        path: "/etc/frr/daemons"
-        line: "bgpd_options=\"   -A 127.0.0.1 -M rpki\""
-        regexp: "^bgpd_options="
-      notify: restart frr
 
     - name: Enable and start frr
       service:
