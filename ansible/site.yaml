@@ -117,6 +117,7 @@
       apk:
         update_cache: yes
         upgrade: yes
+      ignore_errors: yes  # If container is not connected to the internet
 
     - name: Install FRR into container
       delegate_to: R1
