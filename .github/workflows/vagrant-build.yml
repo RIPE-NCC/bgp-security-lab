@@ -52,4 +52,4 @@ jobs:
       - name: Publish box file in the Vagrant Cloud
         env:
           ATLAS_TOKEN: ${{ secrets.VAGRANT_CLOUD_TOKEN }}
-        run: vagrant cloud publish ripencc/ipv6seclab $(cat version.txt) virtualbox ipv6-security-lab-$(cat version.txt).box --force
+        run: vagrant cloud publish ripencc/bgpseclab $(cat version.txt) virtualbox bgp-security-lab-$(cat version.txt).box --force
