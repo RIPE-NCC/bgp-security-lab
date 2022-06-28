@@ -124,6 +124,13 @@
         upgrade: yes
       ignore_errors: yes  # If container is not connected to the internet
 
+    - name: Disable cron in the container
+      delegate_to: R1
+      service:
+        name: crond
+        enabled: no
+        state: stopped
+
     - name: Install FRR into container
       delegate_to: R1
       apk:
@@ -494,6 +501,7 @@
       notify: systemctl daemon-reload
       with_items:
         - ttyd-vtysh@.service
+        - ttyd-logs@.service
         - ttyd-container@.service
         - ttyd-admin.service
         - ttyd-container.target
@@ -507,6 +515,7 @@
       with_items:
         - systemd/ttyd-container.generator
         - systemd/ttyd-vtysh.generator
+        - systemd/ttyd-logs.generator
 
     - name: Enable and start ttyd-container target
       service:

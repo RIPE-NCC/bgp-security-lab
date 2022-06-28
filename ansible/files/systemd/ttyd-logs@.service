@@ -1,0 +1,15 @@
+[Unit]
+Description=ttyd-logs instance %I
+
+[Service]
+User=vagrant
+Group=www-data
+RuntimeDirectory=ttyd-container
+UMask=0002
+ExecStart=/opt/ttyd -i /run/ttyd-container/%i-logs.sock -t fontSize=14 -t disableLeaveAlert=true lxc exec %i -t -- tail -n500 -f /var/log/messages
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target
+

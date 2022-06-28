@@ -18,7 +18,7 @@ module.exports = {
         historyApiFallback: true,
         port: 4022,
         proxy: [{
-            context: ['/console', '/vtysh', '/version.txt'],
+            context: ['/console', '/vtysh', '/version.txt', '/logs'],
             target: 'http://127.0.0.1:8080',
             ws: true
         }]
