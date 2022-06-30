@@ -7,7 +7,7 @@
   handlers:
     - name: netplan apply
       command: netplan apply
-      delegate_to: validator
+      delegate_to: server
     - name: restart frr
       delegate_to: R1
       service:
@@ -21,9 +21,9 @@
         stdin: "{{ lookup('file', 'lxd_preseed.yaml') }}"
         creates: /var/snap/lxd/common/state
 
-    - name: Create Ubuntu container for validator
+    - name: Create Ubuntu container for server
       lxd_container:
-        name: validator
+        name: server
         state: started
         devices:
           eth0:
@@ -44,14 +44,14 @@
         wait_for_ipv4_addresses: true
 
     - name: Install python3-apt
-      delegate_to: validator
+      delegate_to: server
       command:
         cmd: apt-get -y install python3-apt
         warn: false
         creates: /usr/lib/python3/dist-packages/apt/package.py
 
     - name: Install necessary packages
-      delegate_to: validator
+      delegate_to: server
       package:
         update_cache: true
         name:
@@ -61,23 +61,21 @@
           - wget
           - libpcap-dev
           - libssl-dev
-          - gcc
-          - git
-          - make
           - man
           - nano
           - joe
           - vim
+          - bgpq3
 
     - name: Upgrade pip3
-      delegate_to: validator
+      delegate_to: server
       pip:
         executable: pip3
         state: latest
         name: pip
 
     - name: Setup to_R1 interface
-      delegate_to: validator
+      delegate_to: server
       copy:
         src: netplan-to_R1.yaml
         dest: /etc/netplan/20-to_R1.yaml
@@ -179,9 +177,9 @@
       notify: restart frr
       with_items:
         - bgpd
-        - ospfd
         - ospf6d
-        - isisd
+        #- ospfd
+        #- isisd
 
     - name: Enable RPKI support
       delegate_to: R1
@@ -307,12 +305,6 @@
          - network: ixp
            container: R7
            ifname: to_IXP
-         - network: ixp
-           container: R11
-           ifname: to_IXP
-         - network: ixp
-           container: R12
-           ifname: to_IXP
          - network: R11R6
            container: R6
            ifname: to_R11
@@ -325,11 +317,11 @@
          - network: R12R6
            container: R12
            ifname: to_R6
-         - network: R1validator
+         - network: R1server
            container: R1
-           ifname: to_validator
-         - network: R1validator
-           container: validator
+           ifname: to_server
+         - network: R1server
+           container: server
            ifname: to_R1
 
 - name: FRR configuration

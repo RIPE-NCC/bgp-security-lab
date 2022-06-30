@@ -53,7 +53,7 @@ networks:
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: R1validator
+  name: R1server
 storage_pools:
 - config:
     size: 15GB
