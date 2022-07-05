@@ -33,7 +33,7 @@ networks:
 - config:
     ipv4.address: none
     ipv6.address: none
-  name: R1R8
+  name: R1PeerA
 - config:
     ipv4.address: none
     ipv6.address: none

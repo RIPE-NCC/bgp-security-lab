@@ -225,13 +225,13 @@
         - name: R6
           mac: 00:16:3e:ee:00:20
           ip: 192.0.2.20
-        - name: R8
+        - name: PeerA
           mac: 00:16:3e:ee:02:00
           ip: 192.0.2.200
-        - name: R9
+        - name: PeerB
           mac: 00:16:3e:ee:03:00
           ip: 192.0.2.230
-        - name: R10
+        - name: PeerC
           mac: 00:16:3e:ee:04:00
           ip: 192.0.2.240
         - name: R7
@@ -281,11 +281,11 @@
          - network: R1R3
            container: R1
            ifname: to_R3
-         - network: R1R8
+         - network: R1PeerA
            container: R1
-           ifname: to_R8
-         - network: R1R8
-           container: R8
+           ifname: to_PeerA
+         - network: R1PeerA
+           container: PeerA
            ifname: to_R1
          - network: R1R6
            container: R1
@@ -297,10 +297,10 @@
            container: R1
            ifname: to_IXP
          - network: ixp
-           container: R9
+           container: PeerB
            ifname: to_IXP
          - network: ixp
-           container: R10
+           container: PeerC
            ifname: to_IXP
          - network: ixp
            container: R7
