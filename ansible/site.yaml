@@ -66,6 +66,11 @@
           - joe
           - vim
           - bgpq3
+          - whois
+          - curl
+          - gnupg
+          - lsb-release
+          - ca-certificates
 
     - name: Upgrade pip3
       delegate_to: server
