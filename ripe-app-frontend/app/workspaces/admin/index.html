@@ -1,19 +1,22 @@
     <style>
-        section {
-            font-weight: 200;
-            background-color: #fafafa;
+        div.flex {
+          display: flex;
+          flex-wrap: wrap;
         }
-
-        .external-link svg {
-            height: 21px;
-            fill: var(--ripe-app-secondary-100);
-            position: absolute;
-            right: 12px;
-            top: 8px;
+        div.flex div {
+          float: left;
+          margin: 12px;
         }
     </style>
     <section>
-        <vm-console src="/console/admin">
-          <h2>Admin console</h2>
-        </vm-console>
+       <h2>Admin console</h2>
+         <div class="flex">
+           <vm-console src="/console/admin"><h3>VM console</h3></vm-console>
+           <vm-console src="/vtysh/R11/"><h3>Router 11</h3><a href="/logs/R11/" target="_new">open logs</a></vm-console>
+           <vm-console src="/vtysh/R12/"><h3>Router 12</h3><a href="/logs/R12/" target="_new">open logs</a></vm-console>
+           <div>
+             <hints-tag></hints-tag>
+             <scratch-pad></scratch-pad>
+           </div>
+        </div>
     </section>

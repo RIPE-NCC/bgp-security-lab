@@ -1,0 +1,20 @@
+    <style>
+        div.flex {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        div.flex div {
+          float: left;
+          margin: 12px;
+        }
+    </style>
+    <section>
+       <h2>Linux server</h2>
+         <div class="flex">
+           <vm-console src="/console/server/"></vm-console>
+           <div>
+             <hints-tag></hints-tag>
+             <scratch-pad></scratch-pad>
+           </div>
+         </div>
+    </section>
