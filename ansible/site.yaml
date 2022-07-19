@@ -71,6 +71,7 @@
           - gnupg
           - lsb-release
           - ca-certificates
+          - grepcidr
 
     - name: Upgrade pip3
       delegate_to: server
