@@ -10,13 +10,13 @@ on:
 
 jobs:
   build-release:
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Cache Vagrant boxes
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.vagrant.d/boxes
           key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
@@ -36,7 +36,7 @@ jobs:
         run: vagrant package --vagrantfile Vagrantfile-in-box --output bgp-security-lab-$(cat version.txt).box
 
       - name: Store box file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: vagrant-box
           path: "bgp-security-lab-*.box"
