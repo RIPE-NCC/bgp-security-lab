@@ -16,7 +16,7 @@ Installation of the development version
 
   1. Install [VirtualBox](https://www.virtualbox.org/)
   2. Install [Vagrant](https://www.vagrantup.com/)
-  3. Clone or download and unpack [the ZIP](https://github.com/oskar456/bgpsec-netlab/archive/refs/heads/main.zip) (for instance into `~/ripencc/bgpseclab`)
+  3. Clone or download and unpack [the ZIP](https://github.com/oskar456/bgpsec-netlab/archive/refs/heads/main.zip) (for instance into `~/ripencc/bgp-security-lab-main`)
   4. Open a terminal window, enter the empty directory (using `cd` command) directory and run `vagrant up`
   5. Wait a few minutes until vagrant finishes downloading the VM image and
      installing everything.
