@@ -105,7 +105,7 @@
           mode: pull
           server: https://images.linuxcontainers.org
           protocol: simplestreams
-          alias: alpine/3.16/amd64
+          alias: alpine/edge/amd64
         profiles: ["default"]
         wait_for_ipv4_addresses: true
 
