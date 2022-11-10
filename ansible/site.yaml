@@ -240,6 +240,9 @@
         - name: PeerC
           mac: 00:16:3e:ee:04:00
           ip: 192.0.2.240
+        - name: R7
+          mac: 00:16:3e:ee:00:30
+          ip: 192.0.2.30
         - name: R11
           mac: 00:16:3e:ee:00:65
           ip: 192.0.2.65
@@ -304,6 +307,9 @@
            ifname: to_IXP
          - network: ixp
            container: PeerC
+           ifname: to_IXP
+         - network: ixp
+           container: R7
            ifname: to_IXP
          - network: R11R6
            container: R6
