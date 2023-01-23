@@ -39,7 +39,7 @@
           mode: pull
           protocol: simplestreams
           server: https://images.linuxcontainers.org
-          alias: ubuntu/focal
+          alias: ubuntu/jammy
         profiles: ["default"]
         wait_for_ipv4_addresses: true
 
