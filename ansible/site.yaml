@@ -485,7 +485,7 @@
         mode: 0644
 
     - name: Deploy ttyd-container unit files
-      copy:
+      template:
         src: "systemd/{{ item }}"
         dest: "/etc/systemd/system/"
         mode: 0644
