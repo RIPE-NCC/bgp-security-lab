@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.20230123.1](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230123.0...v0.20230123.1) (2023-03-30)
+
+
+### Bug Fixes
+
+* do not depend on user name `vagrant` ([b73d4c0](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/b73d4c043f3234c897f46926e3c41e61b65450bd))
+* drop hard dependencies for x86_64 ([ff9f610](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/ff9f6108f9726fa1db855f30a7b37b05c23c9fb7))
+
 ## 0.20230123.0 (2023-01-23)
 
 
