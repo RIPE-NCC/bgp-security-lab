@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.20230331.0](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230123.0...v0.20230331.0) (2023-03-31)
+
+
+### Features
+
+* support Ubuntu autoinstall ([c399387](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/c399387e8c5faf504b98f26c49b47a193d5bdbb1))
+
+
+### Bug Fixes
+
+* do not depend on user name `vagrant` ([024f356](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/024f3562f23bbe85be6a8ef359190013008263be))
+* drop hard dependencies for x86_64 ([ad1d21c](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/ad1d21c9c255de8115b19ea933ca8f42d64c70c6))
+* frontend update ([4de5357](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/4de53570c293daf677a30a85c7dd6662fc50007a))
+* remove obsolete ansible options ([fe35c73](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/fe35c7335229cca1d9f2370f29051addb2b1ecf1))
+
 ## 0.20230123.0 (2023-01-23)
 
 
