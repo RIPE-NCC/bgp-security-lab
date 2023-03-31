@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.20230124.0](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230123.0...v0.20230124.0) (2023-03-31)
+
+
+### Features
+
+* Document Ubuntu autoinstall ([e606e10](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/e606e100564c9122f2fa797b537cfa57bc2c15c2))
+* support ubuntu autoinstall ([6a1930e](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/6a1930eb463544bf40598abbce3a3042a6165cac))
+
+
+### Bug Fixes
+
+* do not depend on user name `vagrant` ([b73d4c0](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/b73d4c043f3234c897f46926e3c41e61b65450bd))
+* drop hard dependencies for x86_64 ([ff9f610](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/ff9f6108f9726fa1db855f30a7b37b05c23c9fb7))
+
 ## 0.20230123.0 (2023-01-23)
 
 
