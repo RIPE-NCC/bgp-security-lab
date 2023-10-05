@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.20230331.1](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230331.0...v0.20230331.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* fix Debian Stretch repository location ([a493102](https://www.github.com/RIPE-NCC/bgp-security-lab/commit/a49310216ff8b799cbc9c70cbe4868c700ec88bb))
+
 ## [0.20230331.0](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230123.0...v0.20230331.0) (2023-03-31)
 
 
