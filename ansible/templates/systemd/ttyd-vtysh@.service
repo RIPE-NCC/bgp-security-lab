@@ -2,11 +2,11 @@
 Description=ttyd-vtysh instance %I
 
 [Service]
-User={{ ansible_env.SUDO_USER or ansible_user_id }}
+User={{ ansible_facts.env.SUDO_USER or ansible_facts.user_id }}
 Group=www-data
 RuntimeDirectory=ttyd-container
 UMask=0002
-ExecStart=/opt/ttyd -i /run/ttyd-container/%i-vtysh.sock -t fontSize=14 -t disableLeaveAlert=true tmux -2 -L %i-vtysh set -g default-command "lxc exec %i -t -- vtysh" \; new -A -D -s %i-vtysh
+ExecStart=/opt/ttyd -W -i /run/ttyd-container/%i-vtysh.sock -t fontSize=14 -t disableLeaveAlert=true tmux -2 -L %i-vtysh set -g default-command "incus exec %i -t -- vtysh" \; new -A -D -s %i-vtysh
 Type=simple
 Restart=always
 

@@ -1,0 +1,281 @@
+---
+
+
+- name: Deploy Incus containers
+  hosts: default
+  become: false
+  tags: container
+  handlers:
+    - name: restart frr
+      delegate_to: R1
+      service:
+        name: frr
+        state: restarted
+  tasks:
+    - name: Create Alpine container
+      lxd_container:
+        url: "unix:/var/lib/incus/unix.socket"
+        name: R1
+        state: started
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: 192.0.2.101
+            hwaddr: "00:16:3e:ee:01:01"
+        ignore_volatile_options: false
+        source:
+          type: image
+          mode: pull
+          server: https://images.linuxcontainers.org
+          protocol: simplestreams
+          alias: alpine/3.23
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+
+    - name: Check Python3 in the container
+      delegate_to: R1
+      raw: python3 /dev/null
+      register: python3_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Python 3 into Alpine container
+      delegate_to: R1
+      raw: apk add python3
+      when: python3_check.rc != 0
+
+    - name: Upgrade everything in the container
+      delegate_to: R1
+      apk:
+        update_cache: yes
+        upgrade: yes
+      ignore_errors: yes  # If container is not connected to the internet
+
+    - name: Disable cron in the container
+      delegate_to: R1
+      service:
+        name: crond
+        enabled: no
+        state: stopped
+
+    - name: Install FRR into container
+      delegate_to: R1
+      apk:
+        name:
+          - frr
+          - frr-rpki
+
+    - name: Ensure IP forwarding is enabled
+      delegate_to: R1
+      sysctl:
+        sysctl_file: /etc/sysctl.d/forwarding.conf
+        name: "{{ item }}"
+        value: "1"
+        sysctl_set: yes
+      with_items:
+          - net.ipv4.conf.all.forwarding
+          - net.ipv6.conf.all.forwarding
+          - net.ipv6.conf.default.forwarding
+
+    - name: Ensure SLAAC is enabled
+      delegate_to: R1
+      sysctl:
+        sysctl_file: /etc/sysctl.d/slaac.conf
+        name: "{{ item }}"
+        value: "2"
+        sysctl_set: yes
+      with_items:
+          - net.ipv6.conf.default.accept_ra
+          - net.ipv6.conf.all.accept_ra
+          - net.ipv6.conf.eth0.accept_ra
+
+
+    - name: Enable and start sysctl in the container
+      delegate_to: R1
+      service:
+        name: sysctl
+        state: started
+        enabled: yes
+
+    - name: Enable FRR daemons
+      delegate_to: R1
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "{{ item }}=yes"
+        regexp: "^{{ item }}="
+      notify: restart frr
+      with_items:
+        - bgpd
+        - ospf6d
+        #- ospfd
+        #- isisd
+
+    - name: Enable RPKI support
+      delegate_to: R1
+      lineinfile:
+        path: "/etc/frr/daemons"
+        line: "bgpd_options=\"   -A 127.0.0.1 -M rpki\""
+        regexp: "^bgpd_options="
+      notify: restart frr
+
+    - meta: flush_handlers
+
+    - name: Clone Alpine containers
+      lxd_container:
+        url: "unix:/var/lib/incus/unix.socket"
+        name: "{{ item.name }}"
+        ignore_volatile_options: false
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: "{{ item.ip }}"
+            hwaddr: "{{ item.mac }}"
+        state: started
+        source:
+          type: copy
+          source: R1
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+      with_items:
+        - name: R2
+          mac: 00:16:3e:ee:01:02
+          ip: 192.0.2.102
+        - name: R3
+          mac: 00:16:3e:ee:01:03
+          ip: 192.0.2.103
+        - name: R4
+          mac: 00:16:3e:ee:0c:0a
+          ip: 192.0.2.151
+        - name: R5
+          mac: 00:16:3e:ee:0c:0b
+          ip: 192.0.2.152
+        - name: R6
+          mac: 00:16:3e:ee:00:20
+          ip: 192.0.2.20
+        - name: PeerA
+          mac: 00:16:3e:ee:02:00
+          ip: 192.0.2.200
+        - name: PeerB
+          mac: 00:16:3e:ee:03:00
+          ip: 192.0.2.230
+        - name: PeerC
+          mac: 00:16:3e:ee:04:00
+          ip: 192.0.2.240
+        - name: R11
+          mac: 00:16:3e:ee:00:65
+          ip: 192.0.2.65
+        - name: R12
+          mac: 00:16:3e:ee:00:66
+          ip: 192.0.2.66
+
+    - name: Attach networks to the containers
+      command:
+        cmd: "incus network attach {{ item.network }} {{ item.container }} {{ item.ifname }} {{ item.ifname }}"
+      register: net_attach
+      failed_when: net_attach.rc not in [0, 1]
+      changed_when: net_attach.rc == 0
+      with_items:
+         - network: R2R4
+           container: R4
+           ifname: to_R2
+         - network: R2R4
+           container: R2
+           ifname: to_R4
+         - network: R3R5
+           container: R3
+           ifname: to_R5
+         - network: R3R5
+           container: R5
+           ifname: to_R3
+         - network: R2R3
+           container: R2
+           ifname: to_R3
+         - network: R2R3
+           container: R3
+           ifname: to_R2
+         - network: R1R2
+           container: R2
+           ifname: to_R1
+         - network: R1R2
+           container: R1
+           ifname: to_R2
+         - network: R1R3
+           container: R3
+           ifname: to_R1
+         - network: R1R3
+           container: R1
+           ifname: to_R3
+         - network: R1PeerA
+           container: R1
+           ifname: to_PeerA
+         - network: R1PeerA
+           container: PeerA
+           ifname: to_R1
+         - network: R1R6
+           container: R1
+           ifname: to_R6
+         - network: R1R6
+           container: R6
+           ifname: to_R1
+         - network: ixp
+           container: R1
+           ifname: to_IXP
+         - network: ixp
+           container: PeerB
+           ifname: to_IXP
+         - network: ixp
+           container: PeerC
+           ifname: to_IXP
+         - network: R11R6
+           container: R6
+           ifname: to_R11
+         - network: R11R6
+           container: R11
+           ifname: to_R6
+         - network: R12R6
+           container: R6
+           ifname: to_R12
+         - network: R12R6
+           container: R12
+           ifname: to_R6
+         - network: R1server
+           container: R1
+           ifname: to_server
+
+- name: FRR configuration
+  hosts: frr
+  tags: frr
+  tasks:
+    - name: Deploy configs
+      copy:
+        src: "frr/{{ inventory_hostname }}/{{ item }}"
+        dest: "/etc/frr/{{ item }}"
+        owner: frr
+        group: frr
+        mode: 0644
+      notify: restart frr
+      when: "[ playbook_dir, \"files/frr\", inventory_hostname, item]|join('/') is file"
+      with_items:
+        - vtysh.conf
+        - banner.txt
+        - frr.conf
+
+
+    - name: Enable and start frr
+      service:
+        name: frr
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart frr
+      service:
+        name: frr
+        state: restarted
+...

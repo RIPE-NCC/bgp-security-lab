@@ -1,0 +1,21 @@
+---
+
+- name: Install Incus
+  hosts: default
+  become: true
+  tasks:
+    - name: install incus
+      apt:
+        package: incus
+
+- name: Initialize Incus
+  hosts: default
+  become: false
+  tasks:
+    - name: Initialize Incus
+      command:
+        cmd: incus admin init --preseed
+        stdin: "{{ lookup('file', 'incus_preseed.yaml') }}"
+        creates: /var/lib/incus/networks/lxdbr0
+
+...
