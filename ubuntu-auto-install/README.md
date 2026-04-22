@@ -6,7 +6,7 @@ of the lab environment without the help of Vagrant or Virtualbox. It uses
 [Automated Server
 installation](https://ubuntu.com/server/docs/install/autoinstall) feature
 of Ubuntu server together with [cloud-init](https://cloud-init.io/). It can
-run anywhere where Ubuntu 22.04 is supported, including ARM architecture
+run anywhere where Ubuntu 24.04 is supported, including ARM architecture
 computers like M1/M2 Apple Hardware. It has been tested using
 [UTM](https://mac.getutm.app/) hypervisor on both arm64 and x86_64
 architectures. Other hypervisors and/or architectures might or might not

@@ -1,0 +1,92 @@
+---
+
+
+- name: Deploy Linux container
+  hosts: default
+  become: false
+  tags: container
+  handlers:
+    - name: netplan apply
+      command: netplan apply
+      delegate_to: server
+  tasks:
+    - name: Create Ubuntu container for server
+      lxd_container:
+        url: "unix:/var/lib/incus/unix.socket"
+        name: server
+        state: started
+        devices:
+          eth0:
+            type: nic
+            name: eth0
+            nictype: bridged
+            parent: lxdbr0
+            ipv4.address: 192.0.2.5
+            hwaddr: "00:16:3e:ee:00:05"
+        ignore_volatile_options: false
+        source:
+          type: image
+          mode: pull
+          protocol: simplestreams
+          server: https://images.linuxcontainers.org
+          alias: ubuntu/jammy
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+
+    - name: Install python3-apt
+      delegate_to: server
+      command:
+        cmd: apt-get -y install python3-apt
+        creates: /usr/lib/python3/dist-packages/apt/package.py
+
+    - name: Install necessary packages
+      delegate_to: server
+      package:
+        update_cache: true
+        name:
+          - python3-pip
+          - python3
+          - tcpdump
+          - wget
+          - libpcap-dev
+          - libssl-dev
+          - man
+          - nano
+          - joe
+          - vim
+          - bgpq3
+          - bgpq4
+          - whois
+          - curl
+          - gnupg
+          - lsb-release
+          - ca-certificates
+          - grepcidr
+
+    - name: Upgrade pip3
+      delegate_to: server
+      pip:
+        executable: pip3
+        state: latest
+        name: pip
+
+    - name: Attach network to the container
+      command:
+        cmd: "incus network attach {{ item.network }} {{ item.container }} {{ item.ifname }} {{ item.ifname }}"
+      register: net_attach
+      failed_when: net_attach.rc not in [0, 1]
+      changed_when: net_attach.rc == 0
+      with_items:
+         - network: R1server
+           container: server
+           ifname: to_R1
+
+    - name: Setup to_R1 interface
+      delegate_to: server
+      copy:
+        src: netplan-to_R1.yaml
+        dest: /etc/netplan/20-to_R1.yaml
+      notify: netplan apply
+
+
+...
