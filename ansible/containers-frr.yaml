@@ -173,6 +173,12 @@
         - name: R12
           mac: 00:16:3e:ee:00:66
           ip: 192.0.2.66
+        - name: RS1
+          mac: 00:16:3e:ee:00:51
+          ip: 192.0.2.51
+        - name: RS2
+          mac: 00:16:3e:ee:00:52
+          ip: 192.0.2.52
 
     - name: Attach networks to the containers
       command:
@@ -231,6 +237,12 @@
            ifname: to_IXP
          - network: ixp
            container: PeerC
+           ifname: to_IXP
+         - network: ixp
+           container: RS1
+           ifname: to_IXP
+         - network: ixp
+           container: RS2
            ifname: to_IXP
          - network: R11R6
            container: R6
