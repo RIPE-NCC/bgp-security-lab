@@ -3,8 +3,8 @@ networks:
   config:
     ipv4.address: 192.0.2.1/24
     ipv4.nat: true
-    ipv6.address: 2001:db8:f:1::1/64
-    ipv6.nat: true
+    #ipv6.address: 2001:db8:f:1::1/64
+    #ipv6.nat: true
     ipv6.dhcp: false
     raw.dnsmasq: ra-param=lxdbr0,120
     bridge.hwaddr: "00:16:3e:ee:00:01"
