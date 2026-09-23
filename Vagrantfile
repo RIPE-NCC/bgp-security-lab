@@ -6,7 +6,7 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure("2") do |config|
-  config.vm.box = "bento/ubuntu-24.04"
+  config.vm.box = "bento/ubuntu-26.04"
   # config.vm.box_version = "20210603.0.0"
 
   #config.vm.synced_folder ".", "/vagrant", type: "rsync",
@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
   #   vb.gui = true
   #
   #   # Customize the amount of memory on the VM:
-     vb.memory = "2048"
+     vb.memory = "2560"
   end
   config.vm.provision "shell", reset: true, inline: <<-SHELL
      add-apt-repository -y ppa:ansible/ansible

@@ -31,7 +31,7 @@
           mode: pull
           server: https://images.linuxcontainers.org
           protocol: simplestreams
-          alias: alpine/3.23
+          alias: alpine/3.24
         profiles: ["default"]
         wait_for_ipv4_addresses: true
 
@@ -67,6 +67,7 @@
         name:
           - frr
           - frr-rpki
+          - tcpdump
 
     - name: Ensure IP forwarding is enabled
       delegate_to: R1

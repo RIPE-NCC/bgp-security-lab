@@ -29,7 +29,7 @@
           mode: pull
           protocol: simplestreams
           server: https://images.linuxcontainers.org
-          alias: ubuntu/jammy
+          alias: ubuntu/noble
         profiles: ["default"]
         wait_for_ipv4_addresses: true
 
@@ -63,12 +63,12 @@
           - ca-certificates
           - grepcidr
 
-    - name: Upgrade pip3
-      delegate_to: server
-      pip:
-        executable: pip3
-        state: latest
-        name: pip
+#    - name: Upgrade pip3
+#      delegate_to: server
+#      pip:
+#        executable: pip3
+#        state: latest
+#        name: pip
 
     - name: Attach network to the container
       command:
