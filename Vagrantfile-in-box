@@ -16,3 +16,46 @@ Vagrant.configure("2") do |config|
     vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
   end
 end
+
+
+# Workaround issue on newer macOS, see:
+# https://github.com/hashicorp/vagrant/issues/13845#issuecomment-5750253434
+
+require "socket"
+require "vagrant/util/is_port_open"
+
+# Patch only hosts that actually misbehave, so this lapses by itself once macOS or Ruby is fixed.
+socket_tcp_misreports_refusal = lambda do
+  probe = TCPServer.new("127.0.0.1", 0)
+  free_port = probe.addr[1]
+  probe.close
+  Socket.tcp("127.0.0.1", free_port, connect_timeout: 0.1).close
+  true
+rescue StandardError
+  false
+end
+
+if socket_tcp_misreports_refusal.call
+  module Vagrant
+    module Util
+      module IsPortOpen
+        def is_port_open?(host, port)
+          sock = Socket.tcp(host, port, connect_timeout: 0.1)
+          begin
+            sock.remote_address
+            true
+          rescue Errno::EINVAL, Errno::ENOTCONN
+            false
+          ensure
+            sock.close
+          end
+        rescue Errno::ETIMEDOUT, Errno::ECONNREFUSED, Errno::EHOSTUNREACH,
+               Errno::ENETUNREACH, Errno::EACCES, Errno::ENOTCONN, Errno::EALREADY
+          false
+        end
+
+        extend IsPortOpen
+      end
+    end
+  end
+end
