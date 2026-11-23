@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.20261117.0](https://github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230331.0...v0.20261117.0) (2026-11-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add role-based security
+
+### Features
+
+* Add role-based security ([0aab599](https://github.com/RIPE-NCC/bgp-security-lab/commit/0aab599f1c1a3c87e158cb9c5b66a592b4783e34))
+
+
+### Bug Fixes
+
+* fix Debian Stretch repository location ([a493102](https://github.com/RIPE-NCC/bgp-security-lab/commit/a49310216ff8b799cbc9c70cbe4868c700ec88bb))
+
 ## [0.20230331.0](https://www.github.com/RIPE-NCC/bgp-security-lab/compare/v0.20230123.0...v0.20230331.0) (2023-03-31)
 
 
